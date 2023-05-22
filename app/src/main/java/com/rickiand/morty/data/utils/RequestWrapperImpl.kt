@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import retrofit2.Response
 import java.io.IOException
+import java.lang.IllegalArgumentException
 import java.net.HttpURLConnection
 
 class RequestWrapperImpl(

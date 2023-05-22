@@ -16,6 +16,9 @@ class MainRepositoryImpl @Inject constructor(
 ) {
 
     override suspend fun getListPerson(): DataResult<CommonResponse> =
-        wrap { service.getList() }
+        wrap {
+            println("DEBUG")
+            service.getList()
+        }
 
 }

@@ -7,5 +7,5 @@ import retrofit2.http.GET
 interface ServiceApi {
 
     @GET("character")
-    fun getList(): Response<CommonResponse>
+    suspend fun getList(): Response<CommonResponse>
 }
