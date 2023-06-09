@@ -1,6 +1,7 @@
 package com.rickiand.morty.screen.model
 
 data class PersonsUiState(
+    val loading: Boolean = false,
     val persons: List<PersonUiState> = emptyList()
 )
 

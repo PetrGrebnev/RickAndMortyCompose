@@ -10,5 +10,6 @@ data class PersonDto(
     @SerializedName("type") val type: String,
     @SerializedName("gender") val gender: String,
     @SerializedName("location") val location: LocationDto,
-    @SerializedName("image") val image: String
+    @SerializedName("image") val image: String,
+    @SerializedName("url") val url: String
 )
