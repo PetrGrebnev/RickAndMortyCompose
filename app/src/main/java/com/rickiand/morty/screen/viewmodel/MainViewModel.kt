@@ -28,6 +28,8 @@ class MainViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PersonsUiState())
     val uiState : StateFlow<PersonsUiState> = _uiState
 
+    private val likes = mutableListOf<String>()
+
     init {
         viewModelScope.launch {
             _uiState.value = uiState.value.copy(
@@ -72,6 +74,10 @@ class MainViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun onLike(id: String) {
+
     }
 }
 

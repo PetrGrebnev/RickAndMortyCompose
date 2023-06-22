@@ -11,5 +11,6 @@ data class PersonDto(
     @SerializedName("gender") val gender: String,
     @SerializedName("location") val location: LocationDto,
     @SerializedName("image") val image: String,
-    @SerializedName("url") val url: String
+    @SerializedName("url") val url: String,
+    val like: Boolean
 )

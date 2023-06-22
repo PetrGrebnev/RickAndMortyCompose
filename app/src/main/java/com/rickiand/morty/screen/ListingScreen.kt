@@ -3,10 +3,22 @@
 package com.rickiand.morty.screen
 
 import android.annotation.SuppressLint
+import android.view.MotionEvent
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +29,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Card
@@ -27,16 +40,25 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.RequestDisallowInterceptTouchEvent
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
@@ -134,9 +156,7 @@ private fun ListPerson(
     scrollState: LazyListState
 ) {
     var oldFirstItems: Int? = null
-    val animState = remember {
-        mutableStateOf(false)
-    }
+
 
     val animation = remember {
         Animatable(initialValue = 1f)
@@ -162,22 +182,14 @@ private fun ListPerson(
                     personId = personId,
                     scrollState = scrollState
                 )
-                animState.value = person.id == scrollState.firstVisibleItemIndex
-
-                LaunchedEffect(key1 = animState) {
-                    if (animState.value) {
-                        animation.animateTo(
-                            targetValue = 1f / scrollState.firstVisibleItemScrollOffset,
-                            animationSpec = tween(1000)
-                        )
-                    }
-                }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class,
+    ExperimentalComposeUiApi::class
+)
 @Composable
 fun CartPerson(
     modifier: Modifier,
@@ -186,6 +198,16 @@ fun CartPerson(
     personId: MutableState<String>,
     scrollState: LazyListState
 ) {
+    val animState = remember {
+        mutableStateOf(false)
+    }
+    val scaleState = animateFloatAsState(targetValue = if (animState.value) 2f else 1f)
+    val likeState = remember {
+        mutableStateOf(false)
+    }
+    val iconState = remember {
+        mutableIntStateOf( if (likeState.value) R.drawable.im_like else R.drawable.im_dislike )
+    }
 
     val borderState = remember {
         mutableStateOf(
@@ -267,7 +289,53 @@ fun CartPerson(
                     )
                 }
             }
+            IconLike(
+                animState = animState,
+                scaleState = scaleState,
+                likeState = likeState,
+                iconState = iconState
+            )
         }
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun IconLike(
+    animState: MutableState<Boolean>,
+    scaleState: State<Float>,
+    likeState: MutableState<Boolean>,
+    iconState: MutableIntState
+) {
+    Column(
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.End,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Image(
+            modifier = Modifier
+                .padding(8.dp)
+                .scale(scaleState.value)
+                .pointerInteropFilter {
+                    when (it.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            animState.value = true
+                        }
+
+                        MotionEvent.ACTION_UP -> {
+                            animState.value = false
+                            likeState.value = !likeState.value
+                        }
+
+                        else -> {
+                            animState.value = false
+                        }
+                    }
+                    true
+                },
+            painter = painterResource(id = if (likeState.value) R.drawable.im_like else R.drawable.im_dislike),
+            contentDescription = "content"
+        )
     }
 }
 
